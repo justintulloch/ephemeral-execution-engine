@@ -1,0 +1,25 @@
+{
+    "name": "EMBER — Python 3.14",
+    "image": "mcr.microsoft.com/devcontainers/python:2-3.14-trixie",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.testing.pytestArgs": ["tests"],
+                "python.testing.pytestEnabled": true,
+                "editor.formatOnSave": true,
+                "editor.rulers": [100]
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.debugpy",
+                "charliermarsh.ruff",
+                "zxh404.vscode-proto3"
+            ]
+        }
+    },
+    "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt && pip install -r requirements-dev.txt",
+    "forwardPorts": [50051],
+    "remoteUser": "vscode"
+}
