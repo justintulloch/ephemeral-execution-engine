@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+// ─────────────────────────────────────────────
+// Service: Regional Routing Controller (Chicago)
+// ─────────────────────────────────────────────
+
+service RegionalRouter {
+  // Edge (Columbus) asks Regional (Chicago) for a routing decision.
+  // Must respond within 20ms or the edge falls back to local execution.
+  rpc RequestRoute (RouteRequest) returns (RouteResponse);
+}
+
+
+// ─────────────────────────────────────────────
+// Messages
+// ─────────────────────────────────────────────
+
+message RouteRequest {
+    // Unique identifier for this routing request
+    string request_id = 1; 
+
+    // Task metadata for routing decisions
+    string task_type = 2;
+
+    // Timestamp when the edge sent this request (epoch ms)
+    int64 sent_at_ms = 3;
+
+    // Current edge node state (for energy-aware routing)
+    EdgeState edge_state = 4;
+}
+
+message RouteResponse {
+  // Echo back the request ID for correlation
+  string request_id = 1;
+
+  // The routing decision
+  RouteDecision decision = 2;
+
+  // Timestamp when the regional controller responded (epoch ms)
+  int64 responded_at_ms = 3;
+
+  // Reason for the decision (useful for telemetry and debugging)
+  string reason = 4;
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum RouteDecision {
+  // Default: execute locally at the edge
+  EXECUTE_LOCAL = 0;
+
+  // Route to Chicago for split inference
+  ROUTE_REGIONAL = 1;
+}
+
+// ─────────────────────────────────────────────
+// Supporting Types
+// ─────────────────────────────────────────────
+
+message EdgeState {
+  // Current thermal tier: "green", "yellow", "orange", "red"
+  string thermal_tier = 1;
+
+  // Current active worker count
+  int32 active_workers = 2;
+
+  // Current queue depth (out of 22)
+  int32 queue_depth = 3;
+
+  // Current memory tier pressure: "hot", "warm", "cold"
+  string memory_tier = 4;
+}

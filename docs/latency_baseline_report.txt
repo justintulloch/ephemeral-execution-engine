@@ -1,0 +1,17 @@
+EMBER — Ticket 1: Baseline Latency Report
+Generated: 2026-04-21 18:41:40
+
+Total Requests:  1000
+Successes:       1000
+Failures:        0
+
+Min:    0.456 ms
+p50:    0.549 ms
+p95:    1.010 ms
+p99:    1.959 ms
+Max:    4.043 ms
+Mean:   0.634 ms
+Stdev:  0.272 ms
+
+20ms Budget: PASS
+  p99 (1.959ms) <= 20ms
