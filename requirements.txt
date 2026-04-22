@@ -1,0 +1,12 @@
+# gRPC — Edge ↔ Regional communication
+grpcio>=1.80.0
+grpcio-tools>=1.80.0
+
+
+
+# Shared memory & model weight management
+numpy>=2.4.4
+
+
+# System monitoring & resource measurement
+psutil>=7.2.2
