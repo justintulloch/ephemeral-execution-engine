@@ -59,6 +59,11 @@ HYSTERESIS_HIGH_PCT = 0.90
 HYSTERESIS_LOW_PCT = 0.75
 
 # ──────────────────────────────────────────────
+# Queue
+# ──────────────────────────────────────────────
+QUEUE_TTL_MS = 100  # Dead letter: evict tasks waiting longer than 100ms
+
+# ──────────────────────────────────────────────
 # Task Contract
 # ──────────────────────────────────────────────
 DEFAULT_MAX_RETRIES = 2
