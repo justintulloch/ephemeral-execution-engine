@@ -1,160 +1,398 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smiski Animation</title>
-  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.22.5/Babel.min.js"></script>
-  <style>
-    /* Custom styles replacing Tailwind CSS */
-    .container {
-      width: 100%;
-      max-width: 600px;
-      height: 200px;
-      border: 2px solid #4a5568;
-      position: relative;
-      overflow: hidden;
-      background-color: #f7fafc;
-      margin: 32px auto 0 auto; /* Equivalent to mt-8 */
-      border-radius: 8px;
-    }
-    .smiski {
-      width: 50px;
-      height: 50px;
-      position: absolute;
-      bottom: 10px;
-      background-size: cover;
-      transition: transform 0.1s ease-out;
-    }
-    .smiski-running-right {
-      transform: scaleX(1);
-    }
-    .smiski-running-left {
-      transform: scaleX(-1);
-    }
-    .speech-bubble {
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: white;
-      border: 1px solid #4a5568;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      white-space: nowrap;
-      display: none;
-    }
-    .smiski:hover .speech-bubble {
-      display: block;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMBER — Ephemeral Model-Based Burst Execution Runtime</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text: #1a1a1a;
+    --text-secondary: #555;
+    --text-muted: #888;
+    --bg: #fafaf9;
+    --border: #e5e5e5;
+    --accent: #c4440a;
+    --pass: #1a7f37;
+    --tag-bg: #f0eeeb;
+    --metric-bg: #fdfcfb;
+    --code-bg: #f5f3f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  /* Header */
+  .project-name {
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.15rem;
+  }
+
+  .project-name span {
+    color: var(--accent);
+  }
+
+  .project-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
+    margin-bottom: 0.6rem;
+  }
+
+  .tagline {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 2rem;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: var(--tag-bg);
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+  }
+
+  /* Separator */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  /* Sections */
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  p.secondary {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  /* Metrics grid */
+  .metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1.2rem 0 2rem;
+  }
+
+  .metric {
+    background: var(--metric-bg);
+    padding: 1rem 1.1rem;
+  }
+
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.15rem;
+  }
+
+  .metric-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  /* Milestone table */
+  .milestone-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 2rem;
+    font-size: 0.92rem;
+  }
+
+  .milestone-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    padding: 0.5rem 0;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .milestone-table td {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .milestone-table td:last-child {
+    text-align: right;
+  }
+
+  .status-pass {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--pass);
+  }
+
+  .status-next {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .ticket-name {
+    color: var(--text);
+  }
+
+  .ticket-detail {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    display: block;
+    margin-top: 0.1rem;
+  }
+
+  /* Architecture block */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.2rem 1.4rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 1rem 0 2rem;
+  }
+
+  /* Enforcements list */
+  .enforcements {
+    list-style: none;
+    margin: 0.8rem 0 2rem;
+  }
+
+  .enforcements li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.93rem;
+  }
+
+  .enforcements li:last-child {
+    border-bottom: none;
+  }
+
+  .enforcements strong {
+    font-weight: 600;
+  }
+
+  .enforcements .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.84rem;
+    color: var(--accent);
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+
+  .footer a:hover {
+    color: var(--accent);
+  }
+
+  /* Responsive */
+  @media (max-width: 520px) {
+    .container { padding: 2rem 1.2rem 3rem; }
+    .project-name { font-size: 1.5rem; }
+    .metrics { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" data-presets="react,typescript">
-    interface SmiskiProps {
-      id: number;
-      position: number;
-      direction: 'left' | 'right';
-      name: string;
-    }
+<div class="container">
 
-    const Smiski: React.FC<SmiskiProps> = ({ id, position, direction, name }) => {
-      return (
-        <div
-          className={`smiski ${direction === 'right' ? 'smiski-running-right' : 'smiski-running-left'}`}
-          style={{
-            left: `${position}px`,
-            backgroundImage: `url('https://images.squarespace-cdn.com/content/v1/61e7db1ae0a00c2555c705d2/1646175921585-6O9B5E0H0ZJ2ZJ2ZJ2ZJ2/Smiski_Series1.png')`
-          }}
-        >
-          <div className="speech-bubble">{name} says: Hi!</div>
-        </div>
-      );
-    };
+  <div class="project-name"><span>🔥</span> EMBER</div>
+  <div class="project-subtitle">Ephemeral Model-Based Burst Execution Runtime</div>
+  <p class="tagline">Predictable compute for an energy-constrained world.</p>
 
-    const App: React.FC = () => {
-      const [smiskis, setSmiskis] = React.useState<SmiskiProps[]>([
-        { id: 1, position: 0, direction: 'right', name: 'Smiski 1' },
-        { id: 2, position: 100, direction: 'left', name: 'Smiski 2' }
-      ]);
+  <div class="tags">
+    <span class="tag">#distributed-systems</span>
+    <span class="tag">#inference</span>
+    <span class="tag">#python-3.14</span>
+    <span class="tag">#grpc</span>
+    <span class="tag">#fault-tolerance</span>
+  </div>
 
-      React.useEffect(() => {
-        const interval = setInterval(() => {
-          setSmiskis((prevSmiskis) =>
-            prevSmiskis.map((smiski) => {
-              let newPosition = smiski.position + (smiski.direction === 'right' ? 5 : -5);
-              let newDirection = smiski.direction;
+  <p>EMBER is a hierarchical control plane that governs high-variance Python inference tasks across a distributed regional fabric. It replaces ad-hoc offloading with deterministic routing — balancing local thermal budgets against regional energy costs so the system behaves predictably even when demand doesn't.</p>
 
-              if (newPosition >= 550) {
-                newPosition = 550;
-                newDirection = 'left';
-              } else if (newPosition <= 0) {
-                newPosition = 0;
-                newDirection = 'right';
-              }
+  <p class="secondary">Performance is a side effect. Predictability is the goal.</p>
 
-              return { ...smiski, position: newPosition, direction: newDirection };
-            })
-          );
-        }, 100);
+  <hr>
 
-        return () => clearInterval(interval);
-      }, []);
+  <h2>What it enforces</h2>
 
-      return (
-        <div className="container">
-          {smiskis.map((smiski) => (
-            <Smiski key={smiski.id} {...smiski} />
-          ))}
-        </div>
-      );
-    };
+  <ul class="enforcements">
+    <li><strong>Latency stays bounded</strong> — local p50 ≤ <span class="val">80ms</span>, p99 ≤ <span class="val">500ms</span></li>
+    <li><strong>Resources don't spiral</strong> — <span class="val">43</span> fixed workers, <span class="val">22</span>-slot bounded queue</li>
+    <li><strong>Memory is shared, not copied</strong> — <span class="val">400MB</span> model weights via mmap, verified at <span class="val">2MB</span> system delta</li>
+    <li><strong>Failures are expected</strong> — <span class="val">20ms</span> abort-early, circuit breaker trips at <span class="val">3</span> failures</li>
+    <li><strong>Energy is a first-class citizen</strong> — per-job Joule targets, CPU frequency scales with remaining budget</li>
+  </ul>
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+  <hr>
+
+  <h2>Phase 3 — Steel Thread</h2>
+
+  <p class="secondary">Baseline validation proving each architectural pillar under test.</p>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-value">1.96ms</div>
+      <div class="metric-label">gRPC p99 RTT (20ms budget)</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">0.09s</div>
+      <div class="metric-label">43-worker boot time</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">2MB</div>
+      <div class="metric-label">System delta (400MB shared)</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">0.00ms</div>
+      <div class="metric-label">RTT in OPEN state (zero overhead)</div>
+    </div>
+  </div>
+
+  <table class="milestone-table">
+    <thead>
+      <tr>
+        <th>Ticket</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <span class="ticket-name">Skeleton gRPC & Baseline Network Latency</span>
+          <span class="ticket-detail">1,000-ping test, p99 = 1.96ms within 20ms budget</span>
+        </td>
+        <td><span class="status-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>
+          <span class="ticket-name">Admission Controller & Hard Concurrency Limit</span>
+          <span class="ticket-detail">Concurrency wall, 100ms dead letter TTL, 90%/75% hysteresis</span>
+        </td>
+        <td><span class="status-pass">PASS ·  7/7</span></td>
+      </tr>
+      <tr>
+        <td>
+          <span class="ticket-name">Circuit Breaker & Failure Injection</span>
+          <span class="ticket-detail">Abort-early at 22ms, 3-failure trip, half-open recovery</span>
+        </td>
+        <td><span class="status-pass">PASS ·  8/8</span></td>
+      </tr>
+      <tr>
+        <td>
+          <span class="ticket-name">Local Execution Substrate</span>
+          <span class="ticket-detail">43-worker boot, 400MB shared memory, 450ms task leasing</span>
+        </td>
+        <td><span class="status-pass">PASS ·  6/6</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>Architecture</h2>
+
+  <p class="secondary">Edge + Regional topology. Chicago is an optimization layer, not a dependency.</p>
+
+<pre>Client
+  │
+  ▼
+Edge Controller (Columbus)
+  │
+  ├── Admission Gate         90%/75% hysteresis, 22-slot queue
+  │
+  ├── Routing Client ─────── RouteRequest ──→ Chicago Regional
+  │                           20ms timeout / circuit breaker
+  │
+  ├── Bounded Queue          Dead letter TTL: 100ms
+  │
+  ├── Worker Scheduler       Task leasing: 450ms reclaim
+  │
+  └── Worker Pool (43)       Shared model weights via mmap
+</pre>
+
+  <hr>
+
+  <h2>What's next</h2>
+
+  <p class="secondary">The steel thread is complete. Every architectural pillar is validated. Upcoming work focuses on the pieces the design report flagged as still missing.</p>
+
+  <ul class="enforcements">
+    <li><strong>Queue scheduling policy</strong> — FIFO vs priority, cancellation, aging strategy</li>
+    <li><strong>Memory tier implementation</strong> — hot/warm/cold allocation, eviction, migration</li>
+    <li><strong>Routing model</strong> — variance modeling, real network telemetry, adaptive thresholds</li>
+    <li><strong>Observability stack</strong> — latency histograms, energy dashboards, distributed tracing</li>
+    <li><strong>Security</strong> — authentication, encryption, execution sandboxing</li>
+  </ul>
+
+  <div class="footer">
+    <span>EMBER · MIT License</span>
+    <a href="https://github.com/justintulloch/ephemeral-execution-engine">GitHub →</a>
+  </div>
+
+</div>
 </body>
 </html>
